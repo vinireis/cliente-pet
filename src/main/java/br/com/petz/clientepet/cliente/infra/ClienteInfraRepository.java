@@ -3,6 +3,7 @@ package br.com.petz.clientepet.cliente.infra;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -21,7 +22,11 @@ public class ClienteInfraRepository implements ClienteRepository {
 	@Override
 	public Cliente salva(Cliente cliente) {
 		log.info("[inicia] ClienteInfraRepository - salva");
-		clienteSpringDataJPARepository.save(cliente);
+		try {
+			clienteSpringDataJPARepository.save(cliente);
+		} catch (DataIntegrityViolationException e) {
+			throw APIException.build(HttpStatus.BAD_REQUEST, "Existem dados duplicados", e);
+		}
 		log.info("[finaliza] ClienteInfraRepository - salva");
 		return cliente;
 	}
